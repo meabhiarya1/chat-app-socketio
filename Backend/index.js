@@ -1,69 +1,64 @@
 const express = require("express");
-const app = express();
-const port = 4000;
-const { Server } = require("socket.io");
 const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
 
+const app = express();
+const port = 4000;
 app.use(cors({ origin: "*" }));
 
 const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
-const users = {};
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
-});
-console.log(users);
+const users = {}; // { username: socketId }
 
 io.on("connection", (socket) => {
-  console.log("User connected");
+  console.log("User connected:", socket.id);
+
   socket.on("join", (username) => {
     users[username] = socket.id;
-    console.log(users);
-    io.emit("userlist", Object.keys(users));
+    console.log("Users List:", users);
+    io.emit("userlist", Object.keys(users)); // Broadcast user list
   });
 
   socket.on("privatemessage", ({ sender, recipent, message }) => {
     const recipentSocketId = users[recipent];
-    console.log("Recipient Socket ID:", recipentSocketId);
-    
 
-    if (recipentSocketId) {
-      // io.emit("recieveprivatemessage", { sender, message, recipent });
-      // console.log(
-      //   `✅ Message sent to ${recipent} (${recipentSocketId}): ${message}`
-      // );
+    console.log(
+      `📤 ${sender} -> ${recipent}: ${message} (Socket: ${recipentSocketId})`
+    );
+
+    if (recipentSocketId && socket.id !== recipentSocketId) {
+      // Send message only to recipient
       io.to(recipentSocketId).emit("recieveprivatemessage", {
         sender,
         message,
       });
+
+      // Show the message to sender's own chat
       io.to(socket.id).emit("recieveprivatemessage", {
         sender: "You",
         message,
-      }); // Show message to sender
-      console.log(
-        `✅ Message sent to ${recipent} (${recipentSocketId}): ${message}`
-      );
+      });
+
+      console.log(`✅ Message delivered to ${recipent}`);
     } else {
-      console.log(`Recipient ${recipent} not found.`);
+      console.log(`❌ Recipient ${recipent} not found.`);
     }
   });
-  // Group Broadcasting
+
   socket.on("groupmessage", ({ sender, message }) => {
-    io.emit("recievemessage", { sender, message }); // Send to all users
+    io.emit("recievemessage", { sender, message }); // Send to all
   });
 
   socket.on("disconnect", () => {
-    for (let username in users) {
-      if (users[username] === socket.id) {
-        delete users[username];
+    for (let user in users) {
+      if (users[user] === socket.id) {
+        delete users[user];
         break;
       }
     }
-
-    io.emit("userlist", Object.keys(users));
+    io.emit("userlist", Object.keys(users)); // Update user list on disconnect
   });
 });
 
