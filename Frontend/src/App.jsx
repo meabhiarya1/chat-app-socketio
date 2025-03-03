@@ -38,7 +38,6 @@ function App() {
     };
   }, []);
 
-
   const sendPrivateMessage = () => {
     console.log(`📤 Sending private message to ${recipent}: ${message}`);
     if (recipent && message) {
