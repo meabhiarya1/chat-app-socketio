@@ -16,6 +16,7 @@ const io = new Server(server, {
   },
 });
 console.log(users);
+
 io.on("connection", (socket) => {
   console.log("User connected");
   socket.on("join", (username) => {
@@ -27,9 +28,21 @@ io.on("connection", (socket) => {
   socket.on("privatemessage", ({ sender, recipent, message }) => {
     const recipentSocketId = users[recipent];
     console.log("Recipient Socket ID:", recipentSocketId);
+    
 
     if (recipentSocketId) {
-      io.emit("recieveprivatemessage", { sender, message, recipent });
+      // io.emit("recieveprivatemessage", { sender, message, recipent });
+      // console.log(
+      //   `✅ Message sent to ${recipent} (${recipentSocketId}): ${message}`
+      // );
+      io.to(recipentSocketId).emit("recieveprivatemessage", {
+        sender,
+        message,
+      });
+      io.to(socket.id).emit("recieveprivatemessage", {
+        sender: "You",
+        message,
+      }); // Show message to sender
       console.log(
         `✅ Message sent to ${recipent} (${recipentSocketId}): ${message}`
       );

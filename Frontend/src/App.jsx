@@ -9,6 +9,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const userRef = useRef(null);
   const socket = io("http://localhost:4000");
+
   useEffect(() => {
     socket.on("userlist", (users) => {
       console.log(users);
@@ -41,6 +42,7 @@ function App() {
       socket.emit("join", userName);
     }
   };
+
   const sendPrivateMessage = () => {
     console.log(recipent, message);
     if (recipent && message) {
