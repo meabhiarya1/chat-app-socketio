@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import "./App.css";
 
 // Move socket connection OUTSIDE the component to keep it persistent
-const socket = io("http://localhost:4000", { autoConnect: false });
+const socket = io("http://localhost:8000", { autoConnect: false });
 
 function App() {
   const [userName, setUserName] = useState("");
@@ -15,7 +15,6 @@ function App() {
 
   useEffect(() => {
     socket.connect(); // Connect the socket when the component mounts
-
     socket.on("userlist", (users) => {
       console.log("Online users:", users);
       setUsers(users);
