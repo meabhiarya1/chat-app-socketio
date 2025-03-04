@@ -23,7 +23,7 @@ function App() {
     // Listen for private messages
     socket.on("recieveprivatemessage", ({ sender, message }) => {
       console.log(`📩 Received private message from ${sender}: ${message}`);
-      setMessages((prev) => [...prev, { sender, message }]);
+      setMessages((prev) => [...prev, { sender, message }]);  
     });
 
     // Listen for group messages

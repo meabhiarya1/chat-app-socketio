@@ -35,12 +35,6 @@ io.on("connection", (socket) => {
         message,
       });
 
-      // Show the message to sender's own chat
-      io.to(socket.id).emit("recieveprivatemessage", {
-        sender: "You",
-        message,
-      });
-
       console.log(`✅ Message delivered to ${recipent}`);
     } else {
       console.log(`❌ Recipient ${recipent} not found.`);
